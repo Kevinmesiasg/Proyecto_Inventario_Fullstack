@@ -36,6 +36,12 @@ public class UserEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private Integer puntos = 0;
+
+    @Column(nullable = false)
+    private Integer enviosGratis = 0;
+
     @PrePersist
     void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -47,26 +53,101 @@ public class UserEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // ─── Getters & Setters ───────────────────────────────────────
+    /**
+     * Suma un punto por envío realizado.
+     * Cada 15 puntos se obtiene 1 envío gratis.
+     */
+    public void agregarPunto() {
+        this.puntos++;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+        if (this.puntos >= 15) {
+            this.puntos -= 15;
+            this.enviosGratis++;
+        }
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    /**
+     * Consume un envío gratis.
+     */
+    public boolean usarEnvioGratis() {
+        if (this.enviosGratis > 0) {
+            this.enviosGratis--;
+            return true;
+        }
+        return false;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    // ===== GETTERS Y SETTERS =====
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public Long getId() {
+        return id;
+    }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public String getUsername() {
+        return username;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Integer getPuntos() {
+        return puntos;
+    }
+
+    public void setPuntos(Integer puntos) {
+        this.puntos = puntos;
+    }
+
+    public Integer getEnviosGratis() {
+        return enviosGratis;
+    }
+
+    public void setEnviosGratis(Integer enviosGratis) {
+        this.enviosGratis = enviosGratis;
+    }
 }

@@ -34,6 +34,7 @@ export function saveLoginSession(loginResponse) {
   localStorage.setItem(
     "user",
     JSON.stringify({
+      userId: loginResponse.userId,
       username: loginResponse.username,
       role: loginResponse.role,
       tokenType: loginResponse.tokenType,

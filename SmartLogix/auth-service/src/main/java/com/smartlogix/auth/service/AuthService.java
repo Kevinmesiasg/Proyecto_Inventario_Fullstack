@@ -11,11 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servicio de autenticación que orquesta el registro y el login.
- * Utiliza el AuthStrategyResolver (Strategy Pattern) para delegar
- * la autenticación a la estrategia adecuada según la credencial.
- */
 @Service
 @Transactional
 public class AuthService {
@@ -35,9 +30,6 @@ public class AuthService {
         this.strategyResolver = strategyResolver;
     }
 
-    /**
-     * Registra un nuevo usuario con contraseña hasheada (BCrypt).
-     */
     public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new AuthException("El nombre de usuario ya está en uso: " + request.username());
@@ -63,34 +55,29 @@ public class AuthService {
         );
     }
 
-    /**
-     * Autentica al usuario usando el Strategy Pattern.
-     * El AuthStrategyResolver selecciona automáticamente la estrategia
-     * correcta (por username o por email) según la credencial.
-     */
     public AuthResponse login(LoginRequest request) {
         try {
-            // Strategy Pattern: resuelve y ejecuta la estrategia adecuada
             UserEntity user = strategyResolver
                     .resolve(request.credential())
                     .authenticate(request.credential(), request.password());
 
-            String token = jwtProvider.generateToken(user.getUsername(), user.getRole().name());
+            String token = jwtProvider.generateToken(
+                    user.getUsername(),
+                    user.getRole().name()
+            );
 
             return new AuthResponse(
                     token,
+                    user.getId(),
                     user.getUsername(),
                     user.getRole().name(),
-                    jwtProvider.getExpirationMs()
+                    3600000L
             );
         } catch (RuntimeException e) {
             throw new AuthException("Credenciales invalidas.");
         }
     }
 
-    /**
-     * Valida un token JWT y devuelve su información.
-     */
     @Transactional(readOnly = true)
     public AuthResponse validateToken(String token) {
         if (!jwtProvider.validateToken(token)) {
@@ -98,8 +85,16 @@ public class AuthService {
         }
 
         String username = jwtProvider.getUsernameFromToken(token);
-        String role = jwtProvider.getRoleFromToken(token);
 
-        return new AuthResponse(token, username, role, jwtProvider.getExpirationMs());
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthException("Usuario no encontrado."));
+
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name(),
+                3600000L
+        );
     }
 }

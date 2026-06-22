@@ -4,10 +4,12 @@ import LoginPage from "./pages/Login";
 import ShipmentsPage from "./pages/Shipments";
 import OrderPage from "./pages/Order";
 import InventoryPage from "./pages/Inventory";
+import UsersPage from "./pages/Users";
+import MyAccountPage from "./pages/MyAccount";
 import { clearLogin, getSaveToken, getSaveUser } from "./service/authService";
 
 const ShipmentIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/>
     <rect x="9" y="11" width="14" height="10" rx="2"/>
     <circle cx="12" cy="21" r="1"/>
@@ -15,26 +17,17 @@ const ShipmentIcon = () => (
   </svg>
 );
 
-const OrderIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <path d="M16 10a4 4 0 0 1-8 0"/>
-  </svg>
-);
-
-const InventoryIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <ellipse cx="12" cy="5" rx="9" ry="3"/>
-    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-  </svg>
-);
+const OrderIcon = () => <span>📦</span>;
+const InventoryIcon = () => <span>🗄️</span>;
+const UsersIcon = () => <span>👥</span>;
+const AccountIcon = () => <span>👤</span>;
 
 const PRIVATE_ROUTER = [
-  { key: "shipment",  label: "Envíos",     hash: "#/shipment",  icon: <ShipmentIcon />  },
-  { key: "order",     label: "Órdenes",    hash: "#/order",     icon: <OrderIcon />     },
+  { key: "shipment", label: "Envíos", hash: "#/shipment", icon: <ShipmentIcon /> },
+  { key: "order", label: "Órdenes", hash: "#/order", icon: <OrderIcon /> },
   { key: "inventory", label: "Inventario", hash: "#/inventory", icon: <InventoryIcon /> },
+  { key: "users", label: "Usuarios", hash: "#/users", icon: <UsersIcon /> },
+  { key: "account", label: "Mi cuenta", hash: "#/account", icon: <AccountIcon /> },
 ];
 
 function getRouteFromHash() {
@@ -49,8 +42,10 @@ function App() {
     function onHashChange() {
       setCurrent(getRouteFromHash());
     }
+
     window.addEventListener("hashchange", onHashChange);
     onHashChange();
+
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
@@ -60,7 +55,7 @@ function App() {
     const user = getSaveUser();
 
     if (user?.role === "ROLE_USER") {
-      window.location.hash = "#/order";
+      window.location.hash = "#/account";
     } else {
       window.location.hash = "#/shipment";
     }
@@ -69,27 +64,24 @@ function App() {
   function handleLogout() {
     clearLogin();
     setIsLogin(false);
+    window.location.hash = "#/shipment";
   }
 
   function renderPage() {
     const user = getSaveUser();
 
     if (user?.role === "ROLE_USER") {
+      if (current === "order") return <OrderPage />;
+      if (current === "account") return <MyAccountPage />;
 
-      if (current === "order") {
-        return <OrderPage />;
-      }
-
-      return (
-        <p className="loading">
-          No tienes permisos para acceder a esta sección
-        </p>
-      );
+      return <p className="loading">No tienes permisos para acceder a esta sección</p>;
     }
 
     if (current === "shipment") return <ShipmentsPage />;
     if (current === "order") return <OrderPage />;
     if (current === "inventory") return <InventoryPage />;
+    if (current === "users") return <UsersPage />;
+    if (current === "account") return <MyAccountPage />;
 
     return <p className="loading">Ruta no encontrada</p>;
   }
@@ -102,8 +94,12 @@ function App() {
 
   const allowedRoutes =
     user?.role === "ROLE_ADMIN"
-      ? PRIVATE_ROUTER
-      : PRIVATE_ROUTER.filter(route => route.key === "order");
+      ? PRIVATE_ROUTER.filter(route =>
+          ["shipment", "order", "inventory", "users"].includes(route.key)
+        )
+      : PRIVATE_ROUTER.filter(route =>
+          ["order", "account"].includes(route.key)
+        );
 
   return (
     <div className="app-layout">
@@ -131,7 +127,9 @@ function App() {
             <span className="user-role">{user?.role || "USER"}</span>
             <span className="user-name">{user?.username}</span>
           </div>
-          <button className="btn-logout" onClick={handleLogout}>Salir</button>
+          <button className="btn-logout" onClick={handleLogout}>
+            Salir
+          </button>
         </div>
       </aside>
 

@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Transactional
@@ -22,6 +23,7 @@ public class ShipmentService {
 
     private final ShipmentRepository repository;
     private final ShipmentPlanFactoryResolver planFactoryResolver;
+    private final RestTemplate restTemplate;
 
     public ShipmentService(
             ShipmentRepository repository,
@@ -29,6 +31,7 @@ public class ShipmentService {
     ) {
         this.repository = repository;
         this.planFactoryResolver = planFactoryResolver;
+        this.restTemplate = new RestTemplate();
     }
 
     public ShipmentResponse createShipment(CreateShipmentRequest request) {
@@ -38,6 +41,7 @@ public class ShipmentService {
         ShipmentPlan shipmentPlan = planFactory.createPlan(normalizedAddress);
 
         Shipment shipment = new Shipment();
+        shipment.setUserId(request.userId());
         shipment.setOrderNumber(request.orderNumber().trim().toUpperCase());
         shipment.setDestinationAddress(destinationAddress);
         shipment.setTotalUnits(request.totalUnits());
@@ -47,7 +51,14 @@ public class ShipmentService {
         shipment.setStatus(ShipmentStatus.PLANNED);
         shipment.setTrackingCode("SLX-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase());
 
-        return toResponse(repository.save(shipment));
+        Shipment savedShipment = repository.save(shipment);
+
+        restTemplate.put(
+                "http://localhost:8084/api/users/" + request.userId() + "/add-point",
+                null
+        );
+
+        return toResponse(savedShipment);
     }
 
     @Transactional(readOnly = true)

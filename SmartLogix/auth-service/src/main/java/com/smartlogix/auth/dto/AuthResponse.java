@@ -1,16 +1,14 @@
 package com.smartlogix.auth.dto;
 
-/**
- * Respuesta tras una autenticación exitosa.
- */
 public record AuthResponse(
         String token,
         String tokenType,
+        Long userId,
         String username,
         String role,
         long expiresInMs
 ) {
-    public AuthResponse(String token, String username, String role, long expiresInMs) {
-        this(token, "Bearer", username, role, expiresInMs);
+    public AuthResponse(String token, Long userId, String username, String role, long expiresInMs) {
+        this(token, "Bearer", userId, username, role, expiresInMs);
     }
 }

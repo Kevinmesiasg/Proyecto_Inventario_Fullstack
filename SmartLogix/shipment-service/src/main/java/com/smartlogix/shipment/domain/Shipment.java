@@ -20,6 +20,9 @@ public class Shipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private Long userId;
+
     @Column(nullable = false, unique = true, length = 50)
     private String trackingCode;
 
@@ -108,6 +111,10 @@ public class Shipment {
     public LocalDate getEstimatedDeliveryDate() {
         return estimatedDeliveryDate;
     }
+
+    public Long getUserId() {return userId;}
+
+    public void setUserId(Long userId) {this.userId = userId;}
 
     public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
         this.estimatedDeliveryDate = estimatedDeliveryDate;
