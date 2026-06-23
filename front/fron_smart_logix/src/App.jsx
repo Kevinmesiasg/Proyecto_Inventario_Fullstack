@@ -72,6 +72,7 @@ function App() {
 
     if (user?.role === "ROLE_USER") {
       if (current === "order") return <OrderPage />;
+      if (current === "shipment") return <ShipmentsPage />;
       if (current === "account") return <MyAccountPage />;
 
       return <p className="loading">No tienes permisos para acceder a esta sección</p>;
@@ -98,7 +99,7 @@ function App() {
           ["shipment", "order", "inventory", "users"].includes(route.key)
         )
       : PRIVATE_ROUTER.filter(route =>
-          ["order", "account"].includes(route.key)
+          ["order", "shipment", "account"].includes(route.key)
         );
 
   return (

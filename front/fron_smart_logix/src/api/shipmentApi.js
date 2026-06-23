@@ -14,7 +14,10 @@ export function getShipmentByTrackingRequest(trackingCode, auth) {
 export function createShipmentRequest(data, auth) {
   return httpRequest("/api/shipments", {
     method: "POST",
-    headers: { Authorization: auth },
+    headers: {
+      Authorization: auth,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 }

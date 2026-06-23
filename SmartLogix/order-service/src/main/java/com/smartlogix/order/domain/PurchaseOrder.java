@@ -54,6 +54,11 @@ public class PurchaseOrder {
     @Column(nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(nullable = false)
+    private Long userId;
+
+
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderLine> lines = new ArrayList<>();
 
@@ -135,6 +140,14 @@ public class PurchaseOrder {
 
     public List<OrderLine> getLines() {
         return lines;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public void addLine(OrderLine line) {

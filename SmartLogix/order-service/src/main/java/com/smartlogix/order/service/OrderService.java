@@ -70,7 +70,12 @@ public class OrderService {
         order.setStatus(OrderStatus.APPROVED);
 
         ShipmentResponse shipmentResponse = shipmentClient.requestShipment(
-                new ShipmentRequest(order.getOrderNumber(), order.getShippingAddress(), totalUnits(order))
+                new ShipmentRequest(
+                        order.getUserId(),
+                        order.getOrderNumber(),
+                        order.getShippingAddress(),
+                        totalUnits(order)
+                )
         );
 
         if (shipmentResponse == null || shipmentResponse.trackingCode() == null) {
@@ -103,6 +108,8 @@ public class OrderService {
 
     private PurchaseOrder buildOrder(CreateOrderRequest request) {
         PurchaseOrder order = new PurchaseOrder();
+
+        order.setUserId(request.userId());
         order.setCustomerName(request.customerName().trim());
         order.setCustomerEmail(request.customerEmail().trim().toLowerCase());
         order.setShippingAddress(request.shippingAddress().trim());

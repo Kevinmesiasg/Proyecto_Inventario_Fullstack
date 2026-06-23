@@ -53,10 +53,14 @@ public class ShipmentService {
 
         Shipment savedShipment = repository.save(shipment);
 
-        restTemplate.put(
-                "http://localhost:8084/api/users/" + request.userId() + "/add-point",
-                null
-        );
+        try {
+            restTemplate.put(
+                    "http://auth-service:8084/api/users/" + request.userId() + "/add-point",
+                    null
+            );
+        } catch (Exception e) {
+            System.out.println("No se pudo sumar punto al usuario " + request.userId() + ": " + e.getMessage());
+        }
 
         return toResponse(savedShipment);
     }

@@ -10,11 +10,13 @@ export function getOrderByNumberRequest(orderNumber, auth) {
   return httpRequest(`/api/orders/${orderNumber}`, { headers: { Authorization: auth } });
 }
 
-// POST /api/orders
 export function createOrderRequest(data, auth) {
   return httpRequest("/api/orders", {
     method: "POST",
-    headers: { Authorization: auth },
+    headers: {
+      Authorization: auth,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 }
